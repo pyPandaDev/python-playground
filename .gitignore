@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.env
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Test and reproduction scripts
+reproduce_*.py
+test_*.py
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Uploads
+backend/uploads/
+backend/uploads/*.csv
+backend/uploads/*.xlsx
+!frontend/package.json
+!frontend/tsconfig.json
+!frontend/tsconfig.node.json
+
+# Logs
+*.log
