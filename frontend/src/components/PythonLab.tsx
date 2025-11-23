@@ -13,7 +13,7 @@ interface NotebookCell {
   isEditing?: boolean;  // For markdown edit mode
 }
 
-export default function MayankPythonLab() {
+export default function PythonLab() {
   const [mode, setMode] = useState<'editor' | 'notebook'>('editor');
   const [output, setOutput] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
@@ -454,56 +454,57 @@ export default function MayankPythonLab() {
     <div className="h-screen flex flex-col bg-[#1e1e1e] font-mono overflow-hidden">
       <div className="min-h-screen bg-[#1a1a1a] text-gray-100">
         {/* Header */}
-        <div className="h-14 bg-primary border-b border-dark-border flex items-center justify-between px-4 md:px-6 flex-wrap gap-2">
-          <div className="flex items-center gap-3">
-            <Zap className="w-5 h-5 text-accent" />
-            <h1 className="text-base md:text-lg font-semibold text-gray-100 tracking-tight">
+        <div className="min-h-14 bg-primary border-b border-dark-border flex items-center justify-between px-3 md:px-6 flex-wrap gap-2 py-2">
+          <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+            <Zap className="w-5 h-5 text-accent flex-shrink-0" />
+            <h1 className="text-sm md:text-lg font-semibold text-gray-100 tracking-tight">
               Python Workspace
             </h1>
 
-            {/* Mode Toggle */}
-            <div className="hidden sm:flex gap-1 bg-primary-light rounded-lg p-1 ml-6 border border-dark-border">
+            {/* Mode Toggle - Now visible on mobile */}
+            <div className="flex gap-1 bg-primary-light rounded-lg p-1 border border-dark-border">
               <button
                 onClick={() => setMode('editor')}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${mode === 'editor'
+                className={`px-2 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-medium transition-all flex items-center gap-1 md:gap-2 min-h-[44px] md:min-h-0 ${mode === 'editor'
                   ? 'bg-accent text-white shadow-sm'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-primary-lighter'
                   }`}
               >
                 <FileCode className="w-4 h-4" />
-                Editor
+                <span className="hidden sm:inline">Editor</span>
               </button>
               <button
                 onClick={() => setMode('notebook')}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${mode === 'notebook'
+                className={`px-2 md:px-4 py-1.5 rounded-md text-xs md:text-sm font-medium transition-all flex items-center gap-1 md:gap-2 min-h-[44px] md:min-h-0 ${mode === 'notebook'
                   ? 'bg-accent text-white shadow-sm'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-primary-lighter'
                   }`}
               >
                 <BookOpen className="w-4 h-4" />
-                Notebook
+                <span className="hidden sm:inline">Notebook</span>
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 flex-wrap">
             {/* File Management Buttons */}
             <button
               onClick={() => setShowFileDialog(true)}
-              className="p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border"
+              className="p-3 md:p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border min-h-[44px] min-w-[44px] flex items-center justify-center"
               title="New File"
             >
-              <File className="w-4 h-4" />
+              <File className="w-5 h-5 md:w-4 md:h-4" />
             </button>
             <button
               onClick={() => setShowUploadDialog(true)}
-              className="p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border"
+              className="p-3 md:p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border min-h-[44px] min-w-[44px] flex items-center justify-center"
               title="Upload Data"
             >
-              <Upload className="w-4 h-4" />
+              <Upload className="w-5 h-5 md:w-4 md:h-4" />
             </button>
             {uploadedFiles.length > 0 && (
-              <div className="px-3 py-1 bg-accent/10 border border-accent/20 rounded-md text-sm text-accent font-medium">
-                {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''}
+              <div className="px-2 md:px-3 py-1 bg-accent/10 border border-accent/20 rounded-md text-xs md:text-sm text-accent font-medium">
+                <span className="hidden sm:inline">{uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''}</span>
+                <span className="sm:hidden">{uploadedFiles.length}</span>
               </div>
             )}
 
@@ -514,16 +515,17 @@ export default function MayankPythonLab() {
                   <button
                     onClick={runAllCells}
                     disabled={isExecuting}
-                    className="hidden md:flex px-4 py-2 bg-accent hover:bg-accent-hover disabled:bg-gray-600 text-white rounded-md font-medium text-sm transition-colors shadow-sm items-center gap-2"
+                    className="px-3 md:px-4 py-2 bg-accent hover:bg-accent-hover disabled:bg-gray-600 text-white rounded-md font-medium text-xs md:text-sm transition-colors shadow-sm flex items-center gap-2 min-h-[44px]"
                   >
-                    Run All Cells
+                    <Play className="w-4 h-4" fill="white" />
+                    <span className="hidden sm:inline">Run All</span>
                   </button>
                   <button
                     onClick={saveNotebook}
-                    className="p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border"
+                    className="p-3 md:p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border min-h-[44px] min-w-[44px] flex items-center justify-center"
                     title="Save Notebook"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-5 h-5 md:w-4 md:h-4" />
                   </button>
                 </>
               )}
@@ -531,18 +533,18 @@ export default function MayankPythonLab() {
                 <>
                   <button
                     onClick={saveCurrentFile}
-                    className="p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border"
+                    className="p-3 md:p-2 bg-primary-light hover:bg-primary-lighter text-gray-300 rounded-md transition-colors border border-dark-border min-h-[44px] min-w-[44px] flex items-center justify-center"
                     title="Save File"
                   >
-                    <Save className="w-4 h-4" />
+                    <Save className="w-5 h-5 md:w-4 md:h-4" />
                   </button>
                   <button
                     onClick={handleRun}
                     disabled={isExecuting || waitingForInput}
-                    className="hidden md:flex px-4 py-2 bg-accent hover:bg-accent-hover disabled:bg-gray-600 text-white rounded-md font-medium text-sm transition-colors shadow-sm items-center gap-2"
+                    className="px-3 md:px-4 py-2 bg-accent hover:bg-accent-hover disabled:bg-gray-600 text-white rounded-md font-medium text-xs md:text-sm transition-colors shadow-sm flex items-center gap-2 min-h-[44px]"
                   >
                     <Play className="w-4 h-4" fill="white" />
-                    {isExecuting ? 'Running...' : 'Run'}
+                    <span>{isExecuting ? 'Running...' : 'Run'}</span>
                   </button>
                 </>
               )}
@@ -554,8 +556,8 @@ export default function MayankPythonLab() {
         <div className="flex flex-col md:flex-row" style={{ height: 'calc(100vh - 3.5rem)' }}>
           {/* Code Editor/Notebook Panel */}
           <div
-            className="flex flex-col bg-[#1e1e1e] w-full md:w-auto"
-            style={{ width: mode === 'editor' ? `${leftWidth}%` : '100%', minHeight: mode === 'notebook' ? '100%' : '50%' }}
+            className={`flex flex-col bg-[#1e1e1e] w-full ${mode === 'editor' ? 'h-[60vh] md:h-auto md:w-auto' : 'h-full'}`}
+            style={{ width: mode === 'editor' ? `${leftWidth}%` : '100%' }}
           >
             <div className="h-10 bg-[#252526] border-b border-[#3e3e42] flex items-center justify-between px-4">
               <div className="flex items-center gap-1 overflow-x-auto">
@@ -758,7 +760,7 @@ export default function MayankPythonLab() {
           {/* Terminal/Output Panel - Only show in editor mode */}
           {mode === 'editor' && (
             <div
-              className="flex flex-col bg-[#1a1a1a] transition-all duration-300"
+              className="flex flex-col bg-[#1a1a1a] transition-all duration-300 w-full md:w-auto h-[40vh] md:h-auto"
               style={{ width: `${100 - leftWidth}%` }}
             >
               <div className="h-10 bg-[#252526] border-b border-[#3e3e42] flex items-center justify-between px-4">
@@ -846,33 +848,38 @@ export default function MayankPythonLab() {
         </div>
 
         {/* Status Bar */}
-        < div className="h-8 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 border-t border-indigo-500/30 flex items-center justify-between px-4 text-xs backdrop-blur-sm" >
-          <div className="flex items-center gap-6">
+        <div className="h-8 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 border-t border-indigo-500/30 flex items-center justify-between px-3 md:px-4 text-xs backdrop-blur-sm overflow-hidden">
+          <div className="flex items-center gap-3 md:gap-6">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.6)]"></div>
-              <span className="text-gray-300 font-semibold">Python 3.x</span>
+              <span className="text-gray-300 font-semibold text-xs md:text-sm">
+                <span className="hidden sm:inline">Python 3.x</span>
+                <span className="sm:hidden">Py 3.x</span>
+              </span>
             </div>
-            <div className="text-gray-400">
-              Runtime: <span className="text-cyan-400 font-semibold">{executionTime.toFixed(2)}s</span>
+            <div className="text-gray-400 text-xs">
+              <span className="hidden sm:inline">Runtime: </span>
+              <span className="sm:inline">RT: </span>
+              <span className="text-cyan-400 font-semibold">{executionTime.toFixed(2)}s</span>
             </div>
-            <div className="text-gray-400">
+            <div className="text-gray-400 text-xs hidden md:block">
               Memory: <span className="text-indigo-400 font-semibold">{memoryUsed}</span>
             </div>
           </div>
           <div className="text-gray-500 flex items-center gap-2">
-            <span className="text-xs">Mode:</span>
-            <span className="font-semibold text-gray-400">{mode === 'editor' ? '📝 Editor' : '📓 Notebook'}</span>
-            <span className="text-gray-600 mx-2">|</span>
-            <span className="text-gray-500">v1.0</span>
+            <span className="text-xs hidden sm:inline">Mode:</span>
+            <span className="font-semibold text-gray-400 text-xs">{mode === 'editor' ? '📝 Editor' : '📓 Notebook'}</span>
+            <span className="text-gray-600 mx-2 hidden md:inline">|</span>
+            <span className="text-gray-500 hidden md:inline">v1.0</span>
           </div>
         </div>
 
         {/* New File Dialog */}
         {showFileDialog && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-[#2d2d2d] rounded-lg p-6 w-96 border border-indigo-500/30 shadow-2xl animate-fadeIn">
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm px-4">
+            <div className="bg-[#2d2d2d] rounded-lg p-4 md:p-6 w-full max-w-md border border-indigo-500/30 shadow-2xl animate-fadeIn">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h3 className="text-base md:text-lg font-semibold text-white flex items-center gap-2">
                   <File className="w-5 h-5 text-blue-400" />
                   Create New File
                 </h3>
@@ -914,10 +921,10 @@ export default function MayankPythonLab() {
 
         {/* Upload Data Dialog */}
         {showUploadDialog && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-[#2d2d2d] rounded-lg p-6 w-96 border border-green-500/30 shadow-2xl animate-fadeIn">
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm px-4">
+            <div className="bg-[#2d2d2d] rounded-lg p-4 md:p-6 w-full max-w-md border border-green-500/30 shadow-2xl animate-fadeIn">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h3 className="text-base md:text-lg font-semibold text-white flex items-center gap-2">
                   <Upload className="w-5 h-5 text-green-400" />
                   Upload Data File
                 </h3>

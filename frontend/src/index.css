@@ -48,6 +48,7 @@ code {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -58,6 +59,7 @@ code {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -116,7 +118,8 @@ code {
   line-height: 1.6;
 }
 
-.prose ul, .prose ol {
+.prose ul,
+.prose ol {
   margin-left: 1.5rem;
   margin-bottom: 0.75rem;
 }

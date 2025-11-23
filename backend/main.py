@@ -267,52 +267,131 @@ if _all_figures:
         
         
         else:
-            # Original subprocess-based execution for editor mode
-            # Create temporary file for code with UTF-8 encoding
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
-                f.write(wrapped_code)
-                temp_file = f.name
-
+            # Fast exec-based execution for editor mode with graph support
+            from io import StringIO
+            import traceback
+            
             start_time = time.time()
             
-            # Execute with timeout
             try:
-                # No stdin needed - input() is mocked in the wrapper code
-                result = subprocess.run(
-                    [sys.executable, temp_file],
-                    capture_output=True,
-                    text=True,
-                    encoding='utf-8',
-                    errors='replace',
-                    timeout=CODE_TIMEOUT,
-                    cwd=str(UPLOAD_DIR),
-                    env={**os.environ, 'PYTHONIOENCODING': 'utf-8'}
-                )
+                # Create execution namespace with matplotlib and pandas setup
+                exec_globals = {
+                    '__name__': '__main__',
+                    '__builtins__': __builtins__,
+                }
                 
-                execution_time = time.time() - start_time
+                # Setup code for matplotlib and pandas
+                setup_code = """
+import sys
+import io
+import base64
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
+import matplotlib.pyplot as plt
+
+# Configure pandas display options if available
+try:
+    import pandas as pd
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', None)
+except ImportError:
+    pass
+
+# Store all figures
+_all_figures = []
+_captured_figs = set()
+
+# Override plt.show() to save figures instead
+_original_show = plt.show
+def _custom_show():
+    for fig_num in plt.get_fignums():
+        if fig_num not in _captured_figs:
+            fig = plt.figure(fig_num)
+            _all_figures.append(fig)
+            _captured_figs.add(fig_num)
+plt.show = _custom_show
+
+# Clear any existing figures first
+plt.close('all')
+"""
                 
-                return CodeExecutionResponse(
-                    success=result.returncode == 0,
-                    stdout=result.stdout,
-                    stderr=result.stderr,
-                    execution_time=execution_time
-                )
+                # Mock input function
+                input_index = [0]
+                def mock_input(prompt=''):
+                    if prompt:
+                        print(prompt, end='', flush=True)
+                    if input_index[0] < len(stdin_inputs):
+                        value = stdin_inputs[input_index[0]]
+                        input_index[0] += 1
+                        print(value)  # Echo the input value on new line
+                        return value
+                    else:
+                        print()
+                        return ''
                 
-            except subprocess.TimeoutExpired:
+                exec_globals['input'] = mock_input
+                
+                # Capture stdout and stderr
+                stdout_capture = StringIO()
+                stderr_capture = StringIO()
+                old_stdout = sys.stdout
+                old_stderr = sys.stderr
+                old_cwd = os.getcwd()
+                
+                try:
+                    sys.stdout = stdout_capture
+                    sys.stderr = stderr_capture
+                    os.chdir(str(UPLOAD_DIR))
+                    
+                    # Execute setup code first
+                    exec(setup_code, exec_globals)
+                    
+                    # Execute user code
+                    exec(request.code, exec_globals)
+                    
+                    # Extract graphs if any
+                    graph_output = ""
+                    if exec_globals.get('_all_figures'):
+                        graph_output = "\n__GRAPHS_START__\n"
+                        for idx, fig in enumerate(exec_globals['_all_figures']):
+                            buf = io.BytesIO()
+                            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+                            buf.seek(0)
+                            img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+                            graph_output += f"__GRAPH_{idx}__{img_base64}__GRAPH_END__\n"
+                            buf.close()
+                        graph_output += "__GRAPHS_END__\n"
+                        
+                        # Close all figures
+                        import matplotlib.pyplot as plt
+                        plt.close('all')
+                    
+                    execution_time = time.time() - start_time
+                    stdout_result = stdout_capture.getvalue() + graph_output
+                    stderr_result = stderr_capture.getvalue()
+                    
+                    return CodeExecutionResponse(
+                        success=len(stderr_result) == 0,
+                        stdout=stdout_result,
+                        stderr=stderr_result,
+                        execution_time=execution_time
+                    )
+                    
+                finally:
+                    sys.stdout = old_stdout
+                    sys.stderr = old_stderr
+                    os.chdir(old_cwd)
+                    
+            except Exception as e:
                 execution_time = time.time() - start_time
                 return CodeExecutionResponse(
                     success=False,
-                    stdout="",
-                    stderr=f"Error: Code execution timed out ({CODE_TIMEOUT} second limit)",
+                    stdout=stdout_capture.getvalue() if 'stdout_capture' in locals() else "",
+                    stderr=f"Error: {str(e)}\n{traceback.format_exc()}",
                     execution_time=execution_time
                 )
-            
-            finally:
-                # Clean up temporary file
-                try:
-                    os.unlink(temp_file)
-                except:
-                    pass
                 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Execution error: {str(e)}")

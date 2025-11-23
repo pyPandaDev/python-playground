@@ -187,7 +187,7 @@ Edit `backend/main.py` to customize:
 - CORS settings
 
 ### Frontend
-Edit `frontend/src/components/MayankPythonLab.tsx` to customize:
+Edit `frontend/src/components/PythonLab.tsx` to customize:
 - Editor themes
 - UI colors
 -Panel sizes
